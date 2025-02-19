@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vets_uo308831_flutter_app/src/user.dart';
 
 // Create a Form widget.
 class UserSignUpForm extends StatefulWidget {
@@ -9,6 +10,11 @@ class UserSignUpForm extends StatefulWidget {
 
 class UserSignUpFormState extends State<UserSignUpForm> {
   final _formKey = GlobalKey<FormState>();
+  String _name = "";
+  String _surname = "";
+  String _email = "";
+  String _phone = "";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,6 +38,7 @@ class UserSignUpFormState extends State<UserSignUpForm> {
                 }
                 return null;
               },
+              onSaved: (value) => _name = value ?? '',
             ),
             const SizedBox(height: 20),
             TextFormField(
@@ -46,6 +53,9 @@ class UserSignUpFormState extends State<UserSignUpForm> {
                 }
                 return null;
               },
+              onSaved: (value) {
+                _surname = value ?? '';
+              },
             ),
             TextFormField(
               decoration: const InputDecoration(
@@ -59,11 +69,14 @@ class UserSignUpFormState extends State<UserSignUpForm> {
                 }
                 return null;
               },
+              onSaved: (value) {
+                _email = value ?? '';
+              },
             ),
             TextFormField(
               decoration: const InputDecoration(
                 labelText: 'Telefóno',
-                hintText: 'Introduce tu email',
+                hintText: 'Introduce tu teléfono',
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
@@ -72,15 +85,18 @@ class UserSignUpFormState extends State<UserSignUpForm> {
                 }
                 return null;
               },
+              onSaved: (value) {
+                _phone = value ?? '';
+              },
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Processing Data')),
-                    );
+                    _formKey.currentState!.save();
+                    User user = User(_name, _surname, _email, _phone);
+                    Navigator.pop(context, user);
                   }
                 },
                 child: const Text('Submit'),
