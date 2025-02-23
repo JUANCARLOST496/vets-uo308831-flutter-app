@@ -47,6 +47,12 @@ class StateUserEditForm extends State<UserEditForm> {
                 if (value == null || value.isEmpty) {
                   return 'Por favor digite el nombre';
                 }
+                if (value.length < 3) {
+                  return 'El nombre debe tener al menos 3 caracteres';
+                }
+                if (value.length > 50) {
+                  return 'El nombre no puede tener más de 50 caracteres';
+                }
                 return null;
               },
               onSaved: (value) => nameController.text = value ?? '',
@@ -61,6 +67,12 @@ class StateUserEditForm extends State<UserEditForm> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor digite los apellidos';
+                }
+                if (value.length < 3) {
+                  return 'Los apellidos deben tener al menos 3 caracteres';
+                }
+                if (value.length > 100) {
+                  return 'Los apellidos no pueden tener más de 100 caracteres';
                 }
                 return null;
               },

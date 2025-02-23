@@ -44,6 +44,12 @@ class UserSignUpFormState extends State<UserSignUpForm> {
                 if (value == null || value.isEmpty) {
                   return 'Por favor digite el nombre';
                 }
+                if (value.length < 3) {
+                  return 'El nombre debe tener al menos 3 caracteres';
+                }
+                if (value.length > 50) {
+                  return 'El nombre no debe exceder los 50 caracteres';
+                }
                 return null;
               },
               onSaved: (value) => _name = value ?? '',
@@ -58,6 +64,12 @@ class UserSignUpFormState extends State<UserSignUpForm> {
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Por favor digite los apellidos';
+                }
+                if (value.length < 3) {
+                  return 'Los apellidos deben tener al menos 3 caracteres';
+                }
+                if (value.length > 100) {
+                  return 'Los apellidos no deben exceder los 100 caracteres';
                 }
                 return null;
               },
