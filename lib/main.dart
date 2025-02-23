@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:vets_uo308831_flutter_app/pages/home_page.dart';
+import 'pages/login_page.dart'; // Importa la nueva pantalla de inicio de sesión
 
 void main() {
-  runApp(const MainApp());
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: "Aplicación para la gestión de veterinarias",
-      home: HomePage(),
+    return MaterialApp(
+      title: 'Mi Aplicación',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home:
+          const LoginPage(), // Muestra la pantalla de inicio de sesión primero
     );
   }
 }
