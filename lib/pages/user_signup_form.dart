@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:vets_uo308831_flutter_app/src/user.dart';
+import 'package:flutter/services.dart';
+import '../src/user.dart';
 
-// Create a Form widget.
 class UserSignUpForm extends StatefulWidget {
   const UserSignUpForm({super.key});
+
   @override
   UserSignUpFormState createState() => UserSignUpFormState();
 }
@@ -14,6 +15,14 @@ class UserSignUpFormState extends State<UserSignUpForm> {
   String _surname = "";
   String _email = "";
   String _phone = "";
+
+  // Expresión regular para validar el correo electrónico
+  final RegExp _emailRegex = RegExp(
+    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+  );
+
+  // Expresión regular para validar el teléfono (formato: 999-999-999-999)
+  final RegExp _phoneRegex = RegExp(r'^\d{3}-\d{3}-\d{3}-\d{3}$');
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +40,9 @@ class UserSignUpFormState extends State<UserSignUpForm> {
                 hintText: 'Introduce tu nombre',
                 border: OutlineInputBorder(),
               ),
-              // The validator receives the text that the user has entered.
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'por favor digite el nombre';
+                  return 'Por favor digite el nombre';
                 }
                 return null;
               },
@@ -49,13 +57,11 @@ class UserSignUpFormState extends State<UserSignUpForm> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'por favor digite los apellidos';
+                  return 'Por favor digite los apellidos';
                 }
                 return null;
               },
-              onSaved: (value) {
-                _surname = value ?? '';
-              },
+              onSaved: (value) => _surname = value ?? '',
             ),
             TextFormField(
               decoration: const InputDecoration(
@@ -65,29 +71,37 @@ class UserSignUpFormState extends State<UserSignUpForm> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'por favor digite el email';
+                  return 'Por favor digite el email';
+                }
+                if (!_emailRegex.hasMatch(value)) {
+                  return 'Por favor introduce un email válido (ej. email@email.com)';
                 }
                 return null;
               },
-              onSaved: (value) {
-                _email = value ?? '';
-              },
+              onSaved: (value) => _email = value ?? '',
             ),
             TextFormField(
               decoration: const InputDecoration(
-                labelText: 'Telefóno',
+                labelText: 'Teléfono',
                 hintText: 'Introduce tu teléfono',
                 border: OutlineInputBorder(),
               ),
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly, // Permite solo dígitos
+                LengthLimitingTextInputFormatter(14), // Limita a 14 caracteres
+                _PhoneInputFormatter(), // Añade guiones automáticamente
+              ],
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'por favor digite el telefono ';
+                  return 'Por favor digite el teléfono';
+                }
+                if (!_phoneRegex.hasMatch(value)) {
+                  return 'Por favor introduce un teléfono válido (ej. 999-999-999-999)';
                 }
                 return null;
               },
-              onSaved: (value) {
-                _phone = value ?? '';
-              },
+              onSaved: (value) => _phone = value ?? '',
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -99,12 +113,47 @@ class UserSignUpFormState extends State<UserSignUpForm> {
                     Navigator.pop(context, user);
                   }
                 },
-                child: const Text('Submit'),
+                child: const Text('Registrar'),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+// Formateador personalizado para el teléfono
+class _PhoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Si el valor es vacío o si no contiene números, retornamos el valor original
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    // Eliminar todo lo que no sean números
+    String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Añadir los guiones en los lugares correspondientes
+    if (newText.length >= 10) {
+      newText = newText.replaceRange(3, 3, '-');
+      newText = newText.replaceRange(7, 7, '-');
+      newText = newText.replaceRange(11, 11, '-');
+    } else if (newText.length >= 7) {
+      newText = newText.replaceRange(3, 3, '-');
+      newText = newText.replaceRange(7, 7, '-');
+    } else if (newText.length >= 3) {
+      newText = newText.replaceRange(3, 3, '-');
+    }
+
+    // Devolver el nuevo valor con los guiones
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
     );
   }
 }

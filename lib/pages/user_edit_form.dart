@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:vets_uo308831_flutter_app/src/user.dart';
 
 class UserEditForm extends StatefulWidget {
   final User user;
   const UserEditForm({super.key, required this.user});
+
   @override
   State<StatefulWidget> createState() => StateUserEditForm();
 }
@@ -43,7 +45,7 @@ class StateUserEditForm extends State<UserEditForm> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'por Favor digite el nombre';
+                  return 'Por favor digite el nombre';
                 }
                 return null;
               },
@@ -53,18 +55,16 @@ class StateUserEditForm extends State<UserEditForm> {
               controller: surnameController,
               decoration: const InputDecoration(
                 labelText: 'Apellidos',
-                hintText: 'Introduce tu apellidos',
+                hintText: 'Introduce tus apellidos',
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'por favor digite los apellidos';
+                  return 'Por favor digite los apellidos';
                 }
                 return null;
               },
-              onSaved: (value) {
-                surnameController.text = value ?? '';
-              },
+              onSaved: (value) => surnameController.text = value ?? '',
             ),
             TextFormField(
               controller: emailController,
@@ -75,30 +75,45 @@ class StateUserEditForm extends State<UserEditForm> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'por favor digite el email';
+                  return 'Por favor digite el email';
+                }
+                // Validación del formato del email
+                String emailPattern =
+                    r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+                RegExp regex = RegExp(emailPattern);
+                if (!regex.hasMatch(value)) {
+                  return 'Por favor ingrese un email válido';
                 }
                 return null;
               },
-              onSaved: (value) {
-                emailController.text = value ?? '';
-              },
+              onSaved: (value) => emailController.text = value ?? '',
             ),
             TextFormField(
               controller: phoneController,
               decoration: const InputDecoration(
-                labelText: 'Telefóno',
-                hintText: 'Introduce tu email',
+                labelText: 'Teléfono',
+                hintText: 'Introduce tu teléfono',
                 border: OutlineInputBorder(),
               ),
+              keyboardType: TextInputType.phone,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(14), // Limita a 14 caracteres
+                _PhoneInputFormatter(), // Aplica el formato
+              ],
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'por favor digite el telefono ';
+                  return 'Por favor digite el teléfono';
+                }
+                // Validación del formato de teléfono
+                String phonePattern = r'^\d{3}-\d{3}-\d{3}-\d{3}$';
+                RegExp regex = RegExp(phonePattern);
+                if (!regex.hasMatch(value)) {
+                  return 'Por favor ingrese un teléfono válido (999-999-999-999)';
                 }
                 return null;
               },
-              onSaved: (value) {
-                phoneController.text = value ?? '';
-              },
+              onSaved: (value) => phoneController.text = value ?? '',
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -118,12 +133,47 @@ class StateUserEditForm extends State<UserEditForm> {
                     Navigator.pop(context, user);
                   }
                 },
-                child: const Text('Submit'),
+                child: const Text('Guardar cambios'),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+// Formateador personalizado para el teléfono
+class _PhoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Si el valor es vacío o si no contiene números, retornamos el valor original
+    if (newValue.text.isEmpty) {
+      return newValue;
+    }
+
+    // Eliminar todo lo que no sean números
+    String newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    // Añadir los guiones en los lugares correspondientes
+    if (newText.length >= 10) {
+      newText = newText.replaceRange(3, 3, '-');
+      newText = newText.replaceRange(7, 7, '-');
+      newText = newText.replaceRange(11, 11, '-');
+    } else if (newText.length >= 7) {
+      newText = newText.replaceRange(3, 3, '-');
+      newText = newText.replaceRange(7, 7, '-');
+    } else if (newText.length >= 3) {
+      newText = newText.replaceRange(3, 3, '-');
+    }
+
+    // Devolver el nuevo valor con los guiones
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
     );
   }
 }
