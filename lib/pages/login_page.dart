@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // Para manejar las respuestas JSON
 import 'home_page.dart'; // Importa la página principal después del inicio de sesión
 
 class LoginPage extends StatefulWidget {
@@ -13,9 +15,8 @@ class StateLoginPage extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  // Dummy credentials for the login
-  final String validEmail = 'prueba1@prueba1.com';
-  final String validPassword = '123456';
+  // URL del endpoint
+  final String loginUrl = 'http://156.35.95.59:8088/users/login';
 
   @override
   Widget build(BuildContext context) {
@@ -58,29 +59,8 @@ class StateLoginPage extends State<LoginPage> {
                     String email = _emailController.text;
                     String password = _passwordController.text;
 
-                    if (email == validEmail && password == validPassword) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomePage(),
-                        ),
-                      );
-                    } else {
-                      showDialog(
-                        context: context,
-                        builder:
-                            (context) => AlertDialog(
-                              title: const Text('Error'),
-                              content: const Text('Credenciales incorrectas'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cerrar'),
-                                ),
-                              ],
-                            ),
-                      );
-                    }
+                    // Llamada al servidor para la autenticación
+                    _authenticateUser(email, password);
                   }
                 },
                 child: const Text('Iniciar sesión'),
@@ -89,6 +69,49 @@ class StateLoginPage extends State<LoginPage> {
           ),
         ),
       ),
+    );
+  }
+
+  // Método para autenticar al usuario
+  Future<void> _authenticateUser(String email, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse(loginUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email, 'password': password}),
+      );
+
+      if (response.statusCode == 200) {
+        // Si la autenticación es exitosa
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
+      } else {
+        // Si las credenciales no son correctas
+        _showErrorDialog('Credenciales incorrectas');
+      }
+    } catch (e) {
+      // Si hay un error en la conexión o algo inesperado
+      _showErrorDialog('Error de conexión, intente nuevamente.');
+    }
+  }
+
+  // Mostrar el dialogo de error
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cerrar'),
+              ),
+            ],
+          ),
     );
   }
 }
